@@ -1,17 +1,64 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
-export default class Login extends Component{
+class Login extends Component{
     render() {
         return(
             <div>
-               <button onClick={this.onClickLoginButton}> Login page.</button>
+                { 4<5 &&
+                <div>
+                    {this.props.myName}
+                </div>
+                }
+
+               <div>
+                   <button onClick={this.onClickMakeAPICall}>Make API Call</button>
+               </div>
+
+               <div>
+                   {JSON.stringify(this.props.apiresult.error)}
+               </div>
             </div>
         )
     }
 
-    onClickLoginButton = () =>{
-        const h = this.props.history;
+    onClickMakeAPICall = () =>{
+        const url = 'https://jsonplaceholder.typicode.com/todos/1';
 
-        h.push('/homepage');
+        this.props.dispatch(this.getUserDetails(url))
+    }
+
+    getUserDetails = url => {
+
+        return function(dispatch) {
+
+            return fetch(url)
+                .then( res => res.json())
+                .then( response => dispatch(
+                    {
+                        type: "SUCCESS",
+                        data: response
+                    }
+                ))
+                .catch(
+                    error => dispatch(
+                        {
+                            type: "FAILURE",
+                            data: error.message
+                        }
+                    )
+                )
+        }
     }
 }
+
+
+const mapStateToProps = state => {
+    return {
+        myState: state,
+        myName: state.name,
+        apiresult: state.loginAPIresult
+    }
+}
+
+export default connect(mapStateToProps)(Login);

@@ -1,63 +1,81 @@
 import React, { Component } from 'react';
-import { createStore } from 'redux';
-// import { Provider, connect } from 'react-redux'
-// middleware
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
+import Login from './containers/Login';
+import thunk from 'redux-thunk';
 
 const initialState = {
-    name: "Hello"
+    name: "Hello",
+    loginAPIresult: {
+        success: false,
+        error: null,
+        response: null
+    }
 }
 
 const reducer = (prevState = initialState, action) => {
     switch (action.type) {
         case "CHANGE_STATE":
-            // // clone of previous state
-            // const tempState = Object.assign({}, prevState) // Object.assign(target, source)
-
-            // tempState.name = action.data;
-
-            // const newState = Object.assign(prevState, tempState);
-
-            // return newState;
-
             return {...prevState, ...{name: action.data}}
+
+        case "SUCCESS":
+            return {...prevState,...{
+                apiresult: {
+                    success: true,
+                    error: null,
+                    response: action.data
+                }
+            }}
+
+
+        case "FAILURE":
+            return {...prevState, ...{
+                apiresult: {
+                    success: false,
+                    error: action.data,
+                    response: null
+                }
+            }}
 
         default:
             return prevState
     }
 }
 
-const store = createStore(reducer);
+const store = createStore(reducer, applyMiddleware(thunk));
 
 class App extends Component {
     render() {
         return (
-
+            <Provider store={store}>
+                Hello
                 <div>
-                    Redux
-          
-                <div>
-                        <button onClick={this.onClickChangeState}> Change State </button>
-                        <button onClick={this.onClickShowState}> Show State </button>
-                    </div>
+                    <button onClick={this.onClickShowState}>Show State</button>
                 </div>
 
+                <div>
+                    <button onClick={this.onClickChangeState}>Change State</button>
+                </div>
+
+                <div>
+                    <Login/>
+                </div>
+            </Provider>
         );
     }
 
-    onClickChangeState = () => {
+    onClickShowState = () => {
+        console.log(store.getState())
+    } 
 
-        // create action 
-        let action = {
+    onClickChangeState = () => {
+        const action = {
             type: "CHANGE_STATE",
             data: "World"
         }
 
         store.dispatch(action);
-    }
-
-    onClickShowState = () => {
-        console.log(store.getState())
-    }
+    } 
 
 }
 
